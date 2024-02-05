@@ -8,11 +8,8 @@
 <?php
 // Read the contents of the JSON file
 $json = file_get_contents('data/articles.json');
-
-// Check if the file is empty or does not exist
-if (empty($json)) {
-    // Write [] to the file
-    file_put_contents('data/articles.json', '[]');
+if ($json === false) {
+    die('Error reading articles.json');
 }
 
 // Decode the JSON string into an array
@@ -23,22 +20,40 @@ if ($articles === null) {
 
 // Include the navbar
 include 'navbar.php';
+
+// Handle search
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search'])) {
+    $searchTerm = $_GET['search'];
+    // Filter articles based on search term
+    $filteredArticles = array_filter($articles, function($article) use ($searchTerm) {
+        return strpos(strtolower($article['title']), strtolower($searchTerm)) !== false
+            || strpos(strtolower($article['link']), strtolower($searchTerm)) !== false;
+    });
+    $articles = $filteredArticles;
+}
 ?>
 <div class="container">
     <h1>Latest Articles</h1>
+    <form action="index.php" method="get">
+        <input type="text" name="search" placeholder="Search...">
+        <input type="submit" value="Search">
+    </form>
     <ul>
         <?php foreach ($articles as $article): ?>
             <li>
                 <h2><?= $article['title'] ?></h2>
+                <p>ID: <?= $article['id'] ?></p> <!-- Display ID here -->
                 <a href="<?= $article['link'] ?>" target="_blank"><?= $article['link'] ?></a>
-                <form action="edit_article.php" method="post">
-                    <input type="hidden" name="id" value="<?= $article['id'] ?>">
-                    <input type="submit" value="Edit">
-                </form>
-                <form action="delete_article.php" method="post">
-                    <input type="hidden" name="id" value="<?= $article['id'] ?>">
-                    <input type="submit" value="Delete">
-                </form>
+                <div class="article-actions">
+                    <form action="edit_article.php" method="post">
+                        <input type="hidden" name="id" value="<?= $article['id'] ?>">
+                        <input type="submit" value="Edit">
+                    </form>
+                    <form action="delete_article.php" method="post">
+                        <input type="hidden" name="id" value="<?= $article['id'] ?>">
+                        <input type="submit" value="Delete">
+                    </form>
+                </div>
             </li>
         <?php endforeach; ?>
     </ul>
