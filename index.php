@@ -8,8 +8,11 @@
 <?php
 // Read the contents of the JSON file
 $json = file_get_contents('data/articles.json');
-if ($json === false) {
-    die('Error reading articles.json');
+
+// Check if the file is empty or does not exist
+if (empty($json)) {
+    // Write [] to the file
+    file_put_contents('data/articles.json', '[]');
 }
 
 // Decode the JSON string into an array
@@ -32,19 +35,9 @@ include 'navbar.php';
                     <input type="hidden" name="id" value="<?= $article['id'] ?>">
                     <input type="submit" value="Edit">
                 </form>
-                <form action="index.php" method="post">
-                    <input type="hidden" name="delete" value="<?= $article['id'] ?>">
-                    <input type="submit" value="Delete">
-                </form>
-            </li>
-            <li>
-                <form action="edit_article.php" method="post">
+                <form action="delete_article.php" method="post">
                     <input type="hidden" name="id" value="<?= $article['id'] ?>">
-                    <label for="edit_title_<?= $article['id'] ?>">Edit Title:</label>
-                    <input type="text" id="edit_title_<?= $article['id'] ?>" name="title" value="<?= $article['title'] ?>" required><br>
-                    <label for="edit_link_<?= $article['id'] ?>">Edit Link:</label>
-                    <input type="url" id="edit_link_<?= $article['id'] ?>" name="link" value="<?= $article['link'] ?>" required><br>
-                    <input type="submit" value="Save">
+                    <input type="submit" value="Delete">
                 </form>
             </li>
         <?php endforeach; ?>

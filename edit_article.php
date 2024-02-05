@@ -1,12 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Article</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = $_POST['id'];
-    // Load articles from JSON file
     $json = file_get_contents('data/articles.json');
     if ($json === false) {
-
-        echo "Hello, world!";
-        print "Hello again!";
         die('Error reading articles.json');
     }
     $articles = json_decode($json, true);
@@ -15,32 +18,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     }
 
     // Find the article by ID
-    $articleIndex = null;
-    foreach ($articles as $key => $article) {
+    $article = null;
+    foreach ($articles as $article) {
         if ($article['id'] == $id) {
-            $articleIndex = $key;
             break;
         }
     }
 
-    if ($articleIndex === null) {
+    if ($article === null) {
         die('Article not found');
     }
 
-    // Update the article with new values
-    $articles[$articleIndex]['title'] = $_POST['title'];
-    $articles[$articleIndex]['link'] = $_POST['link'];
-
-    // Save updated articles to JSON file
-    $success = file_put_contents('data/articles.json', json_encode($articles));
-    if ($success === false) {
-        die('Error writing articles.json');
-    }
-
-    // Redirect to index.php after updating
-    header('Location: index.php');
-    exit();
+    // Display the form for editing the article
+    ?>
+    <div class="container">
+        <h1>Edit Article</h1>
+        <form action="update_article.php" method="post">
+            <input type="hidden" name="id" value="<?= $article['id'] ?>">
+            <label for="edit_title">Edit Title:</label>
+            <input type="text" id="edit_title" name="title" value="<?= $article['title'] ?>" required><br>
+            <label for="edit_link">Edit Link:</label>
+            <input type="url" id="edit_link" name="link" value="<?= $article['link'] ?>" required><br>
+            <input type="submit" value="Save">
+        </form>
+    </div>
+    <?php
 } else {
     die('Invalid request');
 }
 ?>
+</body>
+</html>
