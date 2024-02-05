@@ -6,16 +6,16 @@
 </head>
 <body>
 <?php
-// Read the contents of the JSON file
+// Read the contents of the JSON file or initialize with an empty array if empty
 $json = file_get_contents('data/articles.json');
-if ($json === false) {
-    die('Error reading articles.json');
-}
-
-// Decode the JSON string into an array
-$articles = json_decode($json, true);
-if ($articles === null) {
-    die('Error decoding articles.json');
+if ($json === false || empty($json)) {
+    $articles = [];
+} else {
+    // Decode the JSON string into an array
+    $articles = json_decode($json, true);
+    if ($articles === null) {
+        die('Error decoding articles.json');
+    }
 }
 
 // Include the navbar
@@ -30,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search'])) {
             || strpos(strtolower($article['link']), strtolower($searchTerm)) !== false;
     });
     $articles = $filteredArticles;
+}
+
+// Save updated articles to JSON file with pretty printing
+$success = file_put_contents('data/articles.json', json_encode($articles, JSON_PRETTY_PRINT));
+if ($success === false) {
+    die('Error writing articles.json');
 }
 ?>
 <div class="container">
